@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5ef">
+  <meta name="description" content="Trova e prenota il tuo campo sportivo. Calcio, tennis e basket, tutto in un unico posto.">
+  <title>Campo Club | Prenota il tuo campo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17241d;
+      --muted: #68756d;
+      --paper: #f3f5ef;
+      --white: #fff;
+      --green: #164b35;
+      --lime: #d6f36a;
+      --line: #e4e9e1;
+      --coral: #e6755c;
+      font-family: "DM Sans", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    .site-header {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 7.2%;
+      background: rgba(243, 245, 239, .95);
+      border-bottom: 1px solid rgba(23, 36, 29, .07);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font: 800 17px Manrope, sans-serif; letter-spacing: 0; }
+    .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; color: var(--green); background: var(--lime); font-size: 15px; }
+    .header-links { display: flex; align-items: center; gap: 32px; color: #536057; font-size: 14px; font-weight: 600; }
+    .header-links a:hover { color: var(--green); }
+    .header-cta { padding: 11px 17px; border-radius: 7px; color: var(--white) !important; background: var(--green); }
+
+    .hero {
+      position: relative;
+      min-height: clamp(640px, calc(100svh - 76px), 900px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(36px, 6vh, 64px) 7.2% 38px;
+      color: white;
+      background: #123b2c;
+      isolation: isolate;
+    }
+    .hero-slide { position: absolute; inset: 0; z-index: -2; background-position: center; background-size: cover; transform: translateX(100%); visibility: hidden; }
+    .hero-slide.is-player { background-size: 110% auto; }
+    .hero-slide.is-active, .hero-slide.is-leaving { visibility: visible; }
+    .hero-slide.is-active { transform: translateX(0); }
+    .hero-slide.is-leaving { transform: translateX(-100%); }
+    .hero.is-sliding .hero-slide { transition: transform .9s cubic-bezier(.65, 0, .35, 1); }
+    .hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(10, 38, 27, .72), rgba(10, 38, 27, .2) 65%, rgba(10, 38, 27, .12)), linear-gradient(0deg, rgba(10, 38, 27, .48), transparent 58%); }
+    .hero-copy { align-self: stretch; max-width: 650px; margin-top: clamp(20px, 6vh, 70px); animation: arrive .55s ease-out both; }
+    .hero-caption { position: absolute; top: 32px; right: 7.2%; z-index: 1; max-width: min(390px, 35%); margin: 0; padding: 10px 14px; border-radius: 5px; background: rgba(10, 38, 27, .62); color: white; font: 600 13px/1.4 Manrope, sans-serif; backdrop-filter: blur(5px); }
+    .hero-discovery { position: relative; z-index: 1; width: 100%; padding: 22px 24px 20px; border: 1px solid rgba(255,255,255,.32); border-radius: 10px; background: rgba(15, 42, 31, .46); box-shadow: 0 12px 32px rgba(0,0,0,.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .hero-discovery.is-changing { animation: discovery-arrive .55s ease both; }
+    @keyframes discovery-arrive { from { opacity: .7; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .hero .section-heading { align-items: center; margin-bottom: 16px; }
+    .hero .section-heading h2 { color: white; font: 800 24px/1.25 Manrope, sans-serif; }
+    .hero .section-heading p { color: rgba(255,255,255,.82); font-size: 14px; }
+    .hero .availability { color: rgba(255,255,255,.9); }
+    .hero .availability-dot { background: var(--lime); box-shadow: 0 0 0 3px rgba(214,243,106,.2); }
+    .hero .toolbar { align-items: center; margin-bottom: 0; }
+    .hero .filters { gap: 9px; }
+    .hero .filter-button { min-height: 41px; padding: 0 17px; border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.12); color: white; }
+    .hero .filter-button:hover { border-color: var(--lime); color: var(--lime); }
+    .hero .filter-button[aria-pressed="true"] { border-color: var(--lime); background: var(--lime); color: #21301c; box-shadow: 0 4px 12px rgba(0,0,0,.16); }
+    .hero .search { width: min(290px, 100%); height: 41px; border-color: rgba(255,255,255,.72); background: rgba(255,255,255,.96); }
+    .eyebrow { margin: 0 0 12px; color: var(--lime); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
+    h1 { margin: 0; font: 700 40px/1.14 Manrope, sans-serif; letter-spacing: 0; }
+    .hero-copy > p:last-child { margin: 13px 0 0; color: rgba(255,255,255,.82); font-size: 16px; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+
+    main { max-width: 1320px; margin: 0 auto; padding: 34px 42px 70px; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+    .section-heading h2 { margin: 0; font: 700 23px/1.25 Manrope, sans-serif; letter-spacing: 0; }
+    .section-heading p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+    .availability { display: flex; align-items: center; gap: 8px; color: #58665c; font-size: 13px; }
+    .availability-dot { width: 8px; height: 8px; border-radius: 50%; background: #72a951; box-shadow: 0 0 0 3px #e3eedb; }
+
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-button { min-height: 38px; padding: 0 15px; border: 1px solid #dfe5dc; border-radius: 6px; background: transparent; color: #5c695f; font-size: 13px; font-weight: 600; transition: background .16s, color .16s, border-color .16s, transform .16s, box-shadow .16s; }
+    .filter-button:hover { border-color: var(--green); color: var(--green); }
+    .filter-button[aria-pressed="true"] { transform: translateY(-3px); border-color: var(--green); background: var(--green); color: white; box-shadow: 0 4px 9px rgba(22,75,53,.2); }
+    .search { width: min(250px, 100%); height: 39px; padding: 0 12px; border: 1px solid #dfe5dc; border-radius: 6px; outline: none; background: white; color: var(--ink); font-size: 13px; }
+    .search:focus { border-color: #6f9c75; box-shadow: 0 0 0 3px rgba(111,156,117,.15); }
+
+    .search-page { max-width: 1320px; min-height: calc(100vh - 76px); margin: 0 auto; padding: 48px 42px 70px; }
+    .search-page-heading { display: flex; align-items: start; justify-content: space-between; gap: 20px; margin-bottom: 27px; }
+    .search-page-heading .eyebrow { color: var(--green); }
+    .search-page-heading h1 { color: var(--ink); font-size: 30px; }
+    .search-page-heading p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+    .search-back { flex: 0 0 auto; padding: 10px 14px; border: 1px solid #dfe5dc; border-radius: 6px; background: white; color: var(--green); font-size: 13px; font-weight: 700; }
+    .search-form { display: grid; grid-template-columns: 1.15fr 1fr 1fr auto; align-items: end; gap: 14px; padding: 20px; border: 1px solid var(--line); border-radius: 9px; background: white; box-shadow: 0 8px 24px rgba(25,49,33,.05); }
+    .search-field { display: grid; gap: 8px; color: #455248; font-size: 12px; font-weight: 700; }
+    .search-field select { width: 100%; height: 44px; padding: 0 11px; border: 1px solid #dce3db; border-radius: 5px; background: white; color: var(--ink); }
+    .price-filter-value { color: var(--green); font-size: 13px; }
+    .search-field input[type="range"] { width: 100%; accent-color: var(--green); }
+    .search-submit, .search-reset { min-height: 44px; padding: 0 18px; border: 0; border-radius: 5px; font-size: 13px; font-weight: 700; }
+    .search-submit { background: var(--green); color: white; }
+    .search-submit:hover { background: #205e43; }
+    .search-reset { margin-left: 8px; background: #f0f3ed; color: var(--ink); }
+    .search-results-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 30px 0 17px; }
+    .search-results-heading h2 { margin: 0; font: 700 20px Manrope, sans-serif; }
+    .search-results-count { margin: 0; color: var(--muted); font-size: 13px; }
+    .search-page .venue-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    body.search-page-active { background: #f8f9f6; }
+    @media (max-width: 900px) {
+      .search-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .search-page .venue-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .venue-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17px; }
+    .venue-card { min-width: 0; overflow: hidden; border: 1px solid #e6e9e3; border-radius: 8px; background: var(--white); transition: transform .18s ease, box-shadow .18s ease; }
+    .venue-card:hover { transform: translateY(-12px); box-shadow: 0 12px 25px rgba(25,49,33,.12); }
+    .scroll-reveal { opacity: 1; transform: translateY(0); transition: opacity .65s ease, transform .65s cubic-bezier(.2,.7,.2,1); }
+    .scroll-reveal:not(.is-visible) { opacity: 0; transform: translateY(28px); }
+    .venue-card.scroll-reveal { transition: opacity .65s ease, transform .65s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease; }
+    .venue-card.scroll-reveal.is-visible:hover { transform: translateY(-12px); }
+    .venue-image { position: relative; height: 160px; background: #d9e3d6; }
+    .venue-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .sport-tag { position: absolute; left: 12px; top: 12px; padding: 6px 9px; border-radius: 4px; background: rgba(255,255,255,.94); color: var(--green); font-size: 11px; font-weight: 700; }
+    .venue-content { padding: 15px 15px 14px; }
+    .venue-title-row { display: flex; align-items: start; justify-content: space-between; gap: 8px; }
+    .venue-title { margin: 0; font: 700 16px/1.3 Manrope, sans-serif; letter-spacing: 0; }
+    .rating { flex: 0 0 auto; color: #7a6230; font-size: 12px; font-weight: 700; }
+    .venue-location { margin: 6px 0 14px; color: var(--muted); font-size: 12px; }
+    .venue-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px solid #edf0eb; }
+    .price { color: var(--green); font: 800 17px Manrope, sans-serif; letter-spacing: 0; }
+    .price small { color: var(--muted); font: 400 11px "DM Sans", sans-serif; }
+    .book-button { min-height: 36px; padding: 0 12px; border: 0; border-radius: 5px; background: var(--lime); color: #21301c; font-size: 12px; font-weight: 700; transition: background .15s; }
+    .book-button:hover { background: #c4e84d; }
+    .empty-state { display: none; padding: 35px 10px; color: var(--muted); text-align: center; }
+
+    dialog { width: min(440px, calc(100% - 32px)); padding: 0; border: 0; border-radius: 9px; color: var(--ink); box-shadow: 0 24px 80px rgba(0,0,0,.24); }
+    dialog::backdrop { background: rgba(12, 27, 19, .58); backdrop-filter: blur(3px); }
+    .dialog-inner { padding: 25px; }
+    .dialog-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .dialog-heading h2 { margin: 0; font: 700 21px Manrope, sans-serif; letter-spacing: 0; }
+    .dialog-heading p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .close-button { width: 32px; height: 32px; border: 0; border-radius: 5px; background: #f0f3ed; color: var(--ink); font-size: 19px; line-height: 1; }
+    .booking-form { display: grid; gap: 14px; }
+    .booking-form label { display: grid; gap: 6px; color: #455248; font-size: 12px; font-weight: 700; }
+    .booking-form input, .booking-form select { width: 100%; height: 42px; padding: 0 10px; border: 1px solid #dce3db; border-radius: 5px; background: white; color: var(--ink); }
+    .field-info-button { width: 100%; min-height: 40px; margin: 0 0 15px; border: 1px solid #dce3db; border-radius: 5px; background: white; color: var(--green); font-size: 13px; font-weight: 700; }
+    .field-info-button:hover { border-color: var(--green); background: #f7f9f4; }
+    .booking-actions { display: grid; grid-template-columns: 1fr 1.5fr; gap: 9px; margin-top: 4px; }
+    .confirm-button, .back-button { min-height: 44px; border: 0; border-radius: 5px; font-weight: 700; }
+    .confirm-button { background: var(--green); color: white; }
+    .back-button { padding: 0 12px; background: #f0f3ed; color: var(--ink); }
+    .back-button:hover { background: #e4e9e1; }
+    .field-info-dialog { width: min(400px, calc(100% - 32px)); }
+    .field-info-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 20px; }
+    .field-info-item { padding: 12px; border-radius: 5px; background: #f4f6f1; }
+    .field-info-item dt { margin-bottom: 5px; color: var(--muted); font-size: 11px; }
+    .field-info-item dd { margin: 0; font-size: 13px; font-weight: 700; line-height: 1.4; }
+    .field-info-description { margin: 0 0 18px; color: #536057; font-size: 13px; line-height: 1.5; }
+    .field-info-dialog .back-button { width: 100%; }
+    .success-message { display: none; padding: 14px; border-radius: 5px; background: #edf5df; color: #294d2c; font-size: 14px; line-height: 1.5; }
+    .return-button { width: 100%; margin-top: 14px; }
+
+    footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px 7.2%; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    footer strong { color: var(--green); }
+
+    @media (max-width: 1000px) {
+      main { padding-right: 28px; padding-left: 28px; }
+      .venue-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .site-header { height: 64px; padding: 0 20px; }
+      .header-links { gap: 15px; font-size: 12px; }
+      .header-links a:first-child { display: none; }
+      .header-cta { padding: 9px 11px; }
+      .hero { min-height: max(700px, calc(100svh - 64px)); padding: 24px 18px 22px; }
+      .hero-slide.is-player { background-position: center 25% !important; background-size: 185% auto; }
+      h1 { max-width: 330px; font-size: 34px; }
+      .hero-copy > p:last-child { max-width: 330px; font-size: 14px; line-height: 1.5; }
+      .hero-caption { top: 16px; right: 18px; max-width: 48%; padding: 8px 10px; font-size: 10px; }
+      .hero-copy { margin-top: 68px; }
+      .hero-discovery { padding: 17px 15px; }
+      .hero .section-heading { align-items: start; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+      .hero .section-heading h2 { font-size: 20px; }
+      .hero .section-heading p { margin-top: 4px; font-size: 12px; }
+      .hero .availability { display: flex; font-size: 11px; }
+      .hero .toolbar { align-items: stretch; flex-direction: column; gap: 12px; }
+      .hero .filters { flex-wrap: nowrap; overflow-x: auto; padding: 2px 2px 5px; }
+      .hero .filter-button { flex: 0 0 auto; padding: 0 13px; font-size: 12px; }
+      .hero .search { width: 100%; }
+      main { padding: 27px 18px 48px; }
+      .search-page { min-height: calc(100vh - 64px); padding: 30px 18px 48px; }
+      .search-page-heading { flex-direction: column; gap: 14px; }
+      .search-page-heading h1 { font-size: 25px; }
+      .search-form { grid-template-columns: 1fr; gap: 15px; padding: 16px; }
+      .search-reset { margin: 8px 0 0; }
+      .search-page .venue-grid { grid-template-columns: 1fr; }
+      .search-results-heading { align-items: start; flex-direction: column; }
+      .section-heading { align-items: start; }
+      .section-heading h2 { font-size: 20px; }
+      .availability { display: none; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; }
+      .filter-button { flex: 0 0 auto; }
+      .search { width: 100%; }
+      .venue-grid { grid-template-columns: 1fr; gap: 13px; }
+      .venue-card { display: grid; grid-template-columns: 39% 1fr; }
+      .venue-image { height: 100%; min-height: 170px; }
+      .venue-content { display: flex; flex-direction: column; justify-content: center; padding: 13px; }
+      .venue-title { font-size: 15px; }
+      .venue-location { margin: 5px 0 12px; }
+      .venue-bottom { margin-top: auto; }
+      footer { padding: 18px 20px; font-size: 11px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .scroll-reveal:not(.is-visible) { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="Campo Club, home">
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <span>campo club</span>
+    </a>
+    <nav class="header-links" aria-label="Navigazione principale">
+      <a href="#campi">I campi</a>
+      <a href="#footer">Come funziona</a>
+      <a class="header-cta" href="#cerca">Prenota ora</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="home" aria-labelledby="page-title">
+    <div class="hero-slide is-active" aria-hidden="true"></div>
+    <div class="hero-slide" aria-hidden="true"></div>
+    <div class="hero-slide" aria-hidden="true"></div>
+    <div class="hero-slide" aria-hidden="true"></div>
+    <div class="hero-slide" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <p class="eyebrow">Il tuo prossimo match inizia qui</p>
+      <h1 id="page-title">Prenota il tuo campo</h1>
+      <p>Trova il posto giusto, scegli l'orario e scendi in campo.</p>
+    </div>
+    <p class="hero-caption" aria-live="off"></p>
+    <div class="hero-discovery">
+      <div class="section-heading">
+        <div>
+          <h2>Campi vicino a te</h2>
+          <p>Scegli il tuo sport e trova il campo perfetto.</p>
+        </div>
+        <span class="availability"><span class="availability-dot" aria-hidden="true"></span>Disponibilità aggiornata</span>
+      </div>
+      <div class="toolbar">
+        <div class="filters" role="group" aria-label="Filtra per sport">
+          <button class="filter-button" type="button" aria-pressed="true" data-filter="Tutti">Tutti</button>
+          <button class="filter-button" type="button" aria-pressed="false" data-filter="Calcio">Calcio</button>
+          <button class="filter-button" type="button" aria-pressed="false" data-filter="Tennis">Tennis</button>
+          <button class="filter-button" type="button" aria-pressed="false" data-filter="Basket">Basket</button>
+        </div>
+        <label>
+          <span hidden>Cerca un campo</span>
+          <input class="search" type="search" placeholder="Cerca per nome o zona" aria-label="Cerca per nome o zona">
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="search-page" id="cerca" aria-labelledby="search-page-title" hidden>
+    <div class="search-page-heading">
+      <div>
+        <p class="eyebrow">Trova il campo giusto per te</p>
+        <h1 id="search-page-title">Cerca e scegli il tuo campo</h1>
+        <p>Seleziona località, sport e budget: ti mostriamo i campi disponibili.</p>
+      </div>
+      <a class="search-back" href="#home">← Torna alla home</a>
+    </div>
+    <form class="search-form">
+      <label class="search-field">Località
+        <select name="area">
+          <option value="Tutte">Tutta Milano</option>
+          <option>San Siro</option>
+          <option>CityLife</option>
+          <option>Navigli</option>
+          <option>Lambrate</option>
+          <option>Isola</option>
+          <option>Bicocca</option>
+          <option>Città Studi</option>
+          <option>Corvetto</option>
+          <option>Porta Venezia</option>
+          <option>Porta Romana</option>
+        </select>
+      </label>
+      <label class="search-field">Sport
+        <select name="sport">
+          <option value="Tutti">Tutti gli sport</option>
+          <option>Calcio</option>
+          <option>Tennis</option>
+          <option>Basket</option>
+        </select>
+      </label>
+      <label class="search-field" for="max-price">
+        <span>Prezzo massimo <output class="price-filter-value" for="max-price">€ 60 / ora</output></span>
+        <input id="max-price" name="maxPrice" type="range" min="20" max="60" step="1" value="60">
+      </label>
+      <div>
+        <button class="search-submit" type="submit">Mostra i campi</button>
+        <button class="search-reset" type="reset">Azzera filtri</button>
+      </div>
+    </form>
+    <div class="search-results-heading">
+      <h2>Campi che fanno per te</h2>
+      <p class="search-results-count" role="status"></p>
+    </div>
+    <div class="search-results"></div>
+  </section>
+
+  <main id="campi">
+    <div class="home-results">
+    <div class="venue-grid" aria-live="polite">
+      <article class="venue-card" data-sport="Calcio" data-search="arena verde san siro milano calcio">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80" alt="Campo da calcio in erba illuminato" loading="lazy">
+          <span class="sport-tag">Calcio a 5</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Arena Verde</h3><span class="rating" aria-label="Valutazione 4,9 su 5">★ 4,9</span></div>
+          <p class="venue-location">San Siro, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 48 <small>/ ora</small></span><button class="book-button" type="button" data-name="Arena Verde" data-price="48">Prenota</button></div>
+        </div>
+      </article>
+
+      <article class="venue-card" data-sport="Tennis" data-search="baseline club citylife milano tennis">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=800&q=80" alt="Campo da tennis pronto per una partita" loading="lazy">
+          <span class="sport-tag">Tennis</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Baseline Club</h3><span class="rating" aria-label="Valutazione 4,7 su 5">★ 4,7</span></div>
+          <p class="venue-location">CityLife, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 24 <small>/ ora</small></span><button class="book-button" type="button" data-name="Baseline Club" data-price="24">Prenota</button></div>
+        </div>
+      </article>
+
+      <article class="venue-card" data-sport="Basket" data-search="playground 21 navigli milano basket">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80" alt="Canestro e campo da basket indoor" loading="lazy">
+          <span class="sport-tag">Basket</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Playground 21</h3><span class="rating" aria-label="Valutazione 4,9 su 5">★ 4,9</span></div>
+          <p class="venue-location">Navigli, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 36 <small>/ ora</small></span><button class="book-button" type="button" data-name="Playground 21" data-price="36">Prenota</button></div>
+        </div>
+      </article>
+
+      <article class="venue-card" data-sport="Calcio" data-search="campo navigli navigli milano calcio">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=800&q=80" alt="Campo da calcio" loading="lazy">
+          <span class="sport-tag">Calcio a 5</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Campo Navigli</h3><span class="rating" aria-label="Valutazione 4,8 su 5">★ 4,8</span></div>
+          <p class="venue-location">Navigli, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 42 <small>/ ora</small></span><button class="book-button" type="button" data-name="Campo Navigli" data-price="42">Prenota</button></div>
+        </div>
+      </article>
+
+      <article class="venue-card" data-sport="Tennis" data-search="tennis lambrate lambrate milano tennis">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=800&q=80" alt="Campo da tennis" loading="lazy">
+          <span class="sport-tag">Tennis</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Tennis Lambrate</h3><span class="rating" aria-label="Valutazione 4,6 su 5">★ 4,6</span></div>
+          <p class="venue-location">Lambrate, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 22 <small>/ ora</small></span><button class="book-button" type="button" data-name="Tennis Lambrate" data-price="22">Prenota</button></div>
+        </div>
+      </article>
+
+      <article class="venue-card" data-sport="Basket" data-search="basket isola isola milano basket">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=800&q=80" alt="Campo da basket" loading="lazy">
+          <span class="sport-tag">Basket</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Basket Isola</h3><span class="rating" aria-label="Valutazione 4,8 su 5">★ 4,8</span></div>
+          <p class="venue-location">Isola, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 30 <small>/ ora</small></span><button class="book-button" type="button" data-name="Basket Isola" data-price="30">Prenota</button></div>
+        </div>
+      </article>
+
+      <article class="venue-card" data-sport="Calcio" data-search="biccocca football club bicocca milano calcio">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=800&q=80" alt="Campo da calcio" loading="lazy">
+          <span class="sport-tag">Calcio a 5</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Bicocca Football Club</h3><span class="rating" aria-label="Valutazione 4,7 su 5">★ 4,7</span></div>
+          <p class="venue-location">Bicocca, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 40 <small>/ ora</small></span><button class="book-button" type="button" data-name="Bicocca Football Club" data-price="40">Prenota</button></div>
+        </div>
+      </article>
+
+      <article class="venue-card" data-sport="Tennis" data-search="tennis città studi città studi milano tennis">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=800&q=80" alt="Campo da tennis" loading="lazy">
+          <span class="sport-tag">Tennis</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Tennis Città Studi</h3><span class="rating" aria-label="Valutazione 4,6 su 5">★ 4,6</span></div>
+          <p class="venue-location">Città Studi, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 25 <small>/ ora</small></span><button class="book-button" type="button" data-name="Tennis Città Studi" data-price="25">Prenota</button></div>
+        </div>
+      </article>
+
+      <article class="venue-card" data-sport="Basket" data-search="basket corvetto corvetto milano basket">
+        <div class="venue-image">
+          <img src="https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=800&q=80" alt="Canestro e campo da basket" loading="lazy">
+          <span class="sport-tag">Basket</span>
+        </div>
+        <div class="venue-content">
+          <div class="venue-title-row"><h3 class="venue-title">Basket Corvetto</h3><span class="rating" aria-label="Valutazione 4,8 su 5">★ 4,8</span></div>
+          <p class="venue-location">Corvetto, Milano</p>
+          <div class="venue-bottom"><span class="price">€ 28 <small>/ ora</small></span><button class="book-button" type="button" data-name="Basket Corvetto" data-price="28">Prenota</button></div>
+        </div>
+      </article>
+    </div>
+    <p class="empty-state" role="status">Nessun campo trovato. Prova a modificare la ricerca.</p>
+    </div>
+  </main>
+
+  <footer id="footer">
+    <span><strong>campo club</strong> · Tutto pronto per la partita?</span>
+    <span>Sport, amici, buon gioco.</span>
+  </footer>
+
+  <dialog aria-labelledby="booking-title">
+    <div class="dialog-inner">
+      <div class="dialog-heading">
+        <div><h2 id="booking-title">Prenota il campo</h2><p class="booking-details"></p></div>
+        <button class="close-button" type="button" aria-label="Chiudi">×</button>
+      </div>
+      <button class="field-info-button" type="button">ⓘ Informazioni sul campo</button>
+      <form class="booking-form">
+        <label>Nome e cognome<input name="customerName" type="text" autocomplete="name" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Telefono<input name="phone" type="tel" autocomplete="tel" required></label>
+        <label>Data<input name="date" type="date" required></label>
+        <label>Orario<select name="time" required><option value="">Scegli un orario</option><option>09:00</option><option>10:00</option><option>11:00</option><option>12:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select></label>
+        <div class="booking-actions">
+          <button class="back-button" type="button" data-return>Indietro</button>
+          <button class="confirm-button" type="submit">Conferma prenotazione</button>
+        </div>
+      </form>
+      <p class="success-message" role="status"></p>
+      <button class="back-button return-button" type="button" data-return hidden>Torna ai campi</button>
+    </div>
+  </dialog>
+
+  <dialog class="field-info-dialog" aria-labelledby="field-info-title">
+    <div class="dialog-inner">
+      <div class="dialog-heading">
+        <div><h2 id="field-info-title">Informazioni sul campo</h2><p class="field-info-name"></p></div>
+        <button class="close-button field-info-close" type="button" aria-label="Chiudi informazioni">×</button>
+      </div>
+      <p class="field-info-description"></p>
+      <dl class="field-info-list">
+        <div class="field-info-item"><dt>Zona</dt><dd data-info="location"></dd></div>
+        <div class="field-info-item"><dt>Sport</dt><dd data-info="sport"></dd></div>
+        <div class="field-info-item"><dt>Orario di apertura</dt><dd data-info="hours"></dd></div>
+        <div class="field-info-item"><dt>Prezzo</dt><dd data-info="price"></dd></div>
+        <div class="field-info-item"><dt>Giocatori consigliati</dt><dd data-info="players"></dd></div>
+        <div class="field-info-item"><dt>Valutazione</dt><dd data-info="rating"></dd></div>
+      </dl>
+      <button class="back-button field-info-back" type="button">Torna alla prenotazione</button>
+    </div>
+  </dialog>
+
+  <script>
+    const additionalVenues = [
+      { sport: "Calcio", name: "Calcio CityLife", area: "CityLife", price: 45, rating: "4,7" },
+      { sport: "Calcio", name: "Calcio Porta Venezia", area: "Porta Venezia", price: 41, rating: "4,8" },
+      { sport: "Calcio", name: "Calcio Isola", area: "Isola", price: 38, rating: "4,6" },
+      { sport: "Calcio", name: "Calcio Corvetto", area: "Corvetto", price: 35, rating: "4,7" },
+      { sport: "Calcio", name: "Calcio Città Studi", area: "Città Studi", price: 39, rating: "4,9" },
+      { sport: "Calcio", name: "Campo Aurora", area: "Porta Romana", price: 29, rating: "3,9" },
+      { sport: "Calcio", name: "Martesana Football Park", area: "Lambrate", price: 31, rating: "4,1" },
+      { sport: "Calcio", name: "Bicocca Soccer Arena", area: "Bicocca", price: 34, rating: "4,2" },
+      { sport: "Calcio", name: "San Siro Green Club", area: "San Siro", price: 44, rating: "4,3" },
+      { sport: "Calcio", name: "Navigli Soccer Park", area: "Navigli", price: 37, rating: "4,5" },
+      { sport: "Calcio", name: "CityLife Football Club", area: "CityLife", price: 52, rating: "4,9" },
+      { sport: "Tennis", name: "Tennis San Siro", area: "San Siro", price: 24, rating: "4,8" },
+      { sport: "Tennis", name: "Tennis Navigli", area: "Navigli", price: 26, rating: "4,7" },
+      { sport: "Tennis", name: "Tennis Porta Romana", area: "Porta Romana", price: 23, rating: "4,8" },
+      { sport: "Tennis", name: "Tennis Bicocca", area: "Bicocca", price: 21, rating: "4,6" },
+      { sport: "Tennis", name: "Tennis Isola", area: "Isola", price: 25, rating: "4,9" },
+      { sport: "Basket", name: "Basket Navigli", area: "Navigli", price: 32, rating: "4,7" },
+      { sport: "Basket", name: "Basket Porta Romana", area: "Porta Romana", price: 29, rating: "4,6" },
+      { sport: "Basket", name: "Basket Lambrate", area: "Lambrate", price: 27, rating: "4,8" },
+      { sport: "Basket", name: "Basket Città Studi", area: "Città Studi", price: 31, rating: "4,7" },
+      { sport: "Basket", name: "Basket San Siro", area: "San Siro", price: 34, rating: "4,9" },
+    ];
+    const venueImages = {
+      Calcio: [
+        "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1518604666860-9ed391f76460?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+      ],
+      Tennis: [
+        "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1587280501635-a19de238a81e?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1542144582-1ba00456b5e3?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?auto=format&fit=crop&w=800&q=80",
+      ],
+      Basket: [
+        "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1505666287802-931dc83948e9?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1544919982-b61976f0ba43?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=800&q=80",
+      ],
+    };
+    const imageIndexes = { Calcio: 0, Tennis: 0, Basket: 0 };
+    document.querySelectorAll(".venue-card").forEach((card) => {
+      const sport = card.dataset.sport;
+      const images = venueImages[sport];
+      card.querySelector("img").src = images[imageIndexes[sport]++];
+    });
+    const venueGrid = document.querySelector(".venue-grid");
+    venueGrid.insertAdjacentHTML("beforeend", additionalVenues.map((venue) => {
+      const images = venueImages[venue.sport];
+      const image = images[imageIndexes[venue.sport]++ % images.length];
+      return `
+        <article class="venue-card" data-sport="${venue.sport}" data-search="${`${venue.name} ${venue.area} Milano ${venue.sport}`.toLocaleLowerCase("it")}">
+          <div class="venue-image">
+            <img src="${image}" alt="Campo da ${venue.sport.toLocaleLowerCase("it")}" loading="lazy">
+            <span class="sport-tag">${venue.sport === "Calcio" ? "Calcio a 5" : venue.sport}</span>
+          </div>
+          <div class="venue-content">
+            <div class="venue-title-row"><h3 class="venue-title">${venue.name}</h3><span class="rating" aria-label="Valutazione ${venue.rating} su 5">★ ${venue.rating}</span></div>
+            <p class="venue-location">${venue.area}, Milano</p>
+            <div class="venue-bottom"><span class="price">€ ${venue.price} <small>/ ora</small></span><button class="book-button" type="button" data-name="${venue.name}" data-price="${venue.price}">Prenota</button></div>
+          </div>
+        </article>
+      `;
+    }).join(""));
+
+    const revealElements = document.querySelectorAll(".venue-card, footer");
+    if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -32px 0px" });
+
+      revealElements.forEach((element) => {
+        element.classList.add("scroll-reveal");
+        revealObserver.observe(element);
+      });
+    }
+
+    const hero = document.querySelector(".hero");
+    const heroSlides = [...hero.querySelectorAll(".hero-slide")];
+    const heroCaption = hero.querySelector(".hero-caption");
+    const heroDiscovery = hero.querySelector(".hero-discovery");
+    const heroMoments = [
+      {
+        image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=2200&q=90",
+        position: "center 48%",
+        caption: "La passione del calcio, vissuta insieme",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=2200&q=90",
+        position: "center 24%",
+        caption: "Ogni partita ha il suo momento decisivo",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=2200&q=90",
+        position: "center 18%",
+        caption: "Energia e gioco di squadra, canestro dopo canestro",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=2200&q=90",
+        position: "center 42%",
+        caption: "Precisione, concentrazione e un punto alla volta",
+      },
+      {
+        image: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=2200&q=90",
+        position: "center",
+        caption: "Un pallone, un campo, una nuova partita",
+      },
+    ];
+    let activeHeroSlide = 0;
+    let heroTransitioning = false;
+
+    heroSlides.forEach((slide, index) => {
+      slide.style.backgroundImage = `url("${heroMoments[index].image}")`;
+      slide.style.backgroundPosition = heroMoments[index].position;
+      if (index === 1) slide.classList.add("is-player");
+    });
+
+    function updateHeroAttribution() {
+      heroCaption.textContent = heroMoments[activeHeroSlide].caption;
+      heroDiscovery.classList.remove("is-changing");
+      window.requestAnimationFrame(() => heroDiscovery.classList.add("is-changing"));
+    }
+
+    updateHeroAttribution();
+
+    function showHeroSlide(direction = 1) {
+      if (heroTransitioning) return;
+      heroTransitioning = true;
+      const currentSlide = heroSlides[activeHeroSlide];
+      activeHeroSlide = (activeHeroSlide + direction + heroSlides.length) % heroSlides.length;
+      const nextSlide = heroSlides[activeHeroSlide];
+
+      hero.classList.add("is-sliding");
+      currentSlide.classList.remove("is-active");
+      currentSlide.classList.add("is-leaving");
+      nextSlide.classList.add("is-active");
+      updateHeroAttribution();
+
+      window.setTimeout(() => {
+        currentSlide.classList.remove("is-leaving");
+        hero.classList.remove("is-sliding");
+        heroTransitioning = false;
+      }, 950);
+    }
+
+    window.setInterval(() => {
+      if (!document.hidden) showHeroSlide();
+    }, 5000);
+
+    const cards = [...document.querySelectorAll(".venue-card")];
+    const originalCardOrder = new Map(cards.map((card, index) => [card, index]));
+    const filterButtons = [...document.querySelectorAll(".filter-button")];
+    const searchInput = document.querySelector(".search");
+    const emptyState = document.querySelector(".empty-state");
+    const homeResults = document.querySelector(".home-results");
+    const searchPage = document.querySelector(".search-page");
+    const searchResults = document.querySelector(".search-results");
+    const searchForm = document.querySelector(".search-form");
+    const searchArea = searchForm.elements.area;
+    const searchSport = searchForm.elements.sport;
+    const searchPrice = searchForm.elements.maxPrice;
+    const searchPriceValue = document.querySelector(".price-filter-value");
+    const searchResultsCount = document.querySelector(".search-results-count");
+    const homePageSections = [
+      document.querySelector(".hero"),
+      document.querySelector("#campi"),
+      document.querySelector("#footer"),
+    ];
+    let activeSport = "Tutti";
+    let activeArea = "Tutte";
+    let maxPrice = Infinity;
+
+    function updateCards() {
+      const query = searchInput.value.trim().toLocaleLowerCase("it");
+      let visibleCount = 0;
+      const orderedCards = [...cards].sort((first, second) => {
+        if (activeSport === "Calcio") {
+          const firstRating = Number(first.querySelector(".rating").textContent.replace(/[^\d,]/g, "").replace(",", "."));
+          const secondRating = Number(second.querySelector(".rating").textContent.replace(/[^\d,]/g, "").replace(",", "."));
+          return firstRating - secondRating || originalCardOrder.get(first) - originalCardOrder.get(second);
+        }
+        return originalCardOrder.get(first) - originalCardOrder.get(second);
+      });
+
+      orderedCards.forEach((card) => {
+        const matchesSport = activeSport === "Tutti" || card.dataset.sport === activeSport;
+        const matchesQuery = card.dataset.search.includes(query);
+        const area = card.querySelector(".venue-location").textContent.split(",")[0].trim();
+        const price = Number(card.querySelector(".book-button").dataset.price);
+        const matchesArea = activeArea === "Tutte" || area === activeArea;
+        const matchesPrice = price <= maxPrice;
+        card.hidden = !(matchesSport && matchesQuery && matchesArea && matchesPrice);
+        if (!card.hidden) visibleCount += 1;
+        venueGrid.append(card);
+      });
+      emptyState.style.display = visibleCount ? "none" : "block";
+      searchResultsCount.textContent = visibleCount === 1
+        ? "1 campo trovato"
+        : `${visibleCount} campi trovati`;
+    }
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeSport = button.dataset.filter;
+        filterButtons.forEach((filter) => filter.setAttribute("aria-pressed", String(filter === button)));
+        updateCards();
+      });
+    });
+    searchInput.addEventListener("input", updateCards);
+
+    searchPrice.addEventListener("input", () => {
+      searchPriceValue.textContent = `€ ${searchPrice.value} / ora`;
+    });
+
+    searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      activeArea = searchArea.value;
+      activeSport = searchSport.value;
+      maxPrice = Number(searchPrice.value);
+      searchInput.value = "";
+      filterButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.filter === activeSport));
+      });
+      updateCards();
+      if (location.hash !== "#cerca") {
+        location.hash = "cerca";
+      } else {
+        renderPage();
+      }
+    });
+
+    searchForm.addEventListener("reset", () => {
+      window.requestAnimationFrame(() => {
+        activeArea = "Tutte";
+        activeSport = "Tutti";
+        maxPrice = Number(searchPrice.value);
+        searchInput.value = "";
+        searchPriceValue.textContent = `€ ${searchPrice.value} / ora`;
+        filterButtons.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.filter === "Tutti"));
+        });
+        updateCards();
+      });
+    });
+
+    let isSearchPageActive = null;
+    function renderPage() {
+      const showSearchPage = location.hash === "#cerca";
+      if (showSearchPage === isSearchPageActive) return;
+      isSearchPageActive = showSearchPage;
+      document.body.classList.toggle("search-page-active", showSearchPage);
+      searchPage.hidden = !showSearchPage;
+      homePageSections.forEach((section) => {
+        section.hidden = showSearchPage;
+      });
+
+      if (showSearchPage) {
+        searchResults.append(venueGrid, emptyState);
+        activeArea = searchArea.value;
+        activeSport = searchSport.value;
+        maxPrice = Number(searchPrice.value);
+        searchInput.value = "";
+        filterButtons.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.filter === activeSport));
+        });
+        updateCards();
+      } else {
+        homeResults.append(venueGrid, emptyState);
+        activeArea = "Tutte";
+        activeSport = "Tutti";
+        maxPrice = Infinity;
+        searchArea.value = "Tutte";
+        searchSport.value = "Tutti";
+        searchPrice.value = "60";
+        searchPriceValue.textContent = "€ 60 / ora";
+        searchInput.value = "";
+        filterButtons.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.filter === "Tutti"));
+        });
+        updateCards();
+      }
+
+      window.requestAnimationFrame(() => {
+        if (showSearchPage || location.hash === "#home" || !location.hash) {
+          window.scrollTo({ top: 0, behavior: "auto" });
+        } else {
+          document.querySelector(location.hash)?.scrollIntoView({ behavior: "auto" });
+        }
+      });
+    }
+
+    window.addEventListener("hashchange", renderPage);
+    renderPage();
+
+    const bookingDialog = document.querySelector("dialog");
+    const fieldInfoDialog = document.querySelector(".field-info-dialog");
+    const bookingForm = document.querySelector(".booking-form");
+    const bookingDetails = document.querySelector(".booking-details");
+    const successMessage = document.querySelector(".success-message");
+    const returnButtons = document.querySelectorAll("[data-return]");
+    const fieldInfoButton = document.querySelector(".field-info-button");
+    const dateInput = bookingForm.elements.date;
+    const localToday = new Date();
+    dateInput.min = `${localToday.getFullYear()}-${String(localToday.getMonth() + 1).padStart(2, "0")}-${String(localToday.getDate()).padStart(2, "0")}`;
+
+    document.querySelectorAll(".book-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const card = button.closest(".venue-card");
+        bookingForm.reset();
+        dateInput.min = `${localToday.getFullYear()}-${String(localToday.getMonth() + 1).padStart(2, "0")}-${String(localToday.getDate()).padStart(2, "0")}`;
+        bookingForm.dataset.name = button.dataset.name;
+        bookingForm.dataset.price = button.dataset.price;
+        bookingForm.dataset.sport = card.dataset.sport;
+        bookingForm.dataset.location = card.querySelector(".venue-location").textContent;
+        bookingForm.dataset.rating = card.querySelector(".rating").textContent.replace("★", "").trim();
+        bookingDetails.textContent = `${button.dataset.name} · € ${button.dataset.price} / ora`;
+        bookingForm.hidden = false;
+        successMessage.style.display = "none";
+        returnButtons[1].hidden = true;
+        bookingDialog.showModal();
+      });
+    });
+
+    fieldInfoButton.addEventListener("click", () => {
+      const sport = bookingForm.dataset.sport;
+      const venueInfo = {
+        Calcio: { label: "Calcio a 5", players: "10 giocatori", description: "Campo da calcio a 5, ideale per partite tra amici." },
+        Tennis: { label: "Tennis", players: "2–4 giocatori", description: "Campo da tennis adatto a partite singole o in doppio." },
+        Basket: { label: "Basket", players: "10 giocatori", description: "Campo da basket per partite tra due squadre." },
+      }[sport];
+      const information = {
+        location: bookingForm.dataset.location,
+        sport: venueInfo.label,
+        hours: "Tutti i giorni, 09:00–22:00",
+        price: `€ ${bookingForm.dataset.price} / ora`,
+        players: venueInfo.players,
+        rating: `★ ${bookingForm.dataset.rating} / 5`,
+      };
+
+      document.querySelector(".field-info-name").textContent = bookingForm.dataset.name;
+      document.querySelector(".field-info-description").textContent = venueInfo.description;
+      Object.entries(information).forEach(([key, value]) => {
+        fieldInfoDialog.querySelector(`[data-info="${key}"]`).textContent = value;
+      });
+      fieldInfoDialog.showModal();
+    });
+
+    document.querySelector(".close-button").addEventListener("click", () => bookingDialog.close());
+    document.querySelector(".field-info-close").addEventListener("click", () => fieldInfoDialog.close());
+    document.querySelector(".field-info-back").addEventListener("click", () => fieldInfoDialog.close());
+    returnButtons.forEach((button) => button.addEventListener("click", () => bookingDialog.close()));
+    bookingDialog.addEventListener("click", (event) => {
+      if (event.target === bookingDialog) bookingDialog.close();
+    });
+    bookingForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const date = new Date(`${dateInput.value}T00:00:00`).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
+      successMessage.textContent = `Riepilogo per ${bookingForm.elements.customerName.value}: ${bookingForm.dataset.name}, ${date} alle ${bookingForm.elements.time.value}. Totale: € ${bookingForm.dataset.price}.`;
+      bookingForm.hidden = true;
+      successMessage.style.display = "block";
+      returnButtons[1].hidden = false;
+    });
+  </script>
+</body>
+</html>
